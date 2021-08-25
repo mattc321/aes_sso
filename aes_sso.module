@@ -1,0 +1,45 @@
+<?php
+
+use Drupal\impexium_sso\Api\Model\Response\ImpexiumUser;
+use Drupal\impexium_sso\Model\AllowLoginResponse;
+use Drupal\user\UserInterface;
+
+/**
+ *
+ * Implements hook_impexium_sso_should_authenticate_user()
+ *
+ * @param UserInterface $drupalUser
+ * @param ImpexiumUser $impexiumUser
+ * @param AllowLoginResponse $allowLoginResponse
+ */
+function aes_sso_impexium_sso_should_authenticate_user(UserInterface $drupalUser, ImpexiumUser $impexiumUser, AllowLoginResponse $allowLoginResponse)
+{
+
+  //check for the custom am_registration field. If its not there, or if its not AM2021
+  //then do not allow authentication.
+
+  $amRegistrationField = $impexiumUser->getCustomField('am_registration');
+
+  if (! $amRegistrationField) {
+    failLogin($allowLoginResponse);
+  }
+
+  if (! isset($amRegistrationField['value'])) {
+    failLogin($allowLoginResponse);
+  }
+
+  $safeValue = strtolower($amRegistrationField['value']);
+
+  if ($safeValue !== 'am2021') {
+    failLogin($allowLoginResponse);
+  }
+}
+
+/**
+ * @param AllowLoginResponse $allowLoginResponse
+ */
+function failLogin(AllowLoginResponse $allowLoginResponse)
+{
+  \Drupal::service('impexium_sso.exception_handler')->handleException(new Exception('You do not have access to login.'));
+  $allowLoginResponse->setAllowLogin(false);
+}

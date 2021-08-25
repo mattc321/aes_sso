@@ -1,0 +1,9 @@
+name: 'AES Impexium SSO Customization'
+type: module
+description: 'Customization of the Impexium sso module'
+package: AES SSO
+version: '1.0'
+core_version_requirement: ^8 || ^9
+project: 'aes_sso'
+dependencies:
+  - impexium_sso
